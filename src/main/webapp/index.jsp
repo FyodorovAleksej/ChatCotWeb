@@ -39,10 +39,28 @@
     <button type="submit" class="btn btn-primary">${se}</button>
 </form>
 <h1 class="alert-info"><fmt:message key="result" /> = ${answer}</h1>
+<fmt:message key="save" var="sa"/>
+<% if ("NEW".equals(request.getAttribute("answer"))) { %>
+<form action="main" method="post" enctype="multipart/form-data">
+    <select id="type" class="form-control" name="type">
+        <option value="standard greetings">standard greetings</option>
+        <option value="special greetings">special greetings</option>
+        <option value="question greetings">question greetings</option>
+        <option value="greetings answer">greetings answer</option>
+        <option value="yes">yes</option>
+        <option value="no">no</option>
+        <option value="default">default</option>
+        <option value="initialize">initialize</option>
+        <option value="filter">filter</option>
+        <option value="adding">adding</option>
+    </select>
+    <button type="submit" class="btn btn-primary">${sa}</button>
+</form>
+<% } %>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="${request.contextPath}/WEB-INF/lib/http_code.jquery.com_jquery-3.2.1.slim.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="${request.contextPath}/WEB-INF/lib/http_cdnjs.cloudflare.com_ajax_libs_popper.js_1.12.9_umd_popper.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="${request.contextPath}/WEB-INF/lib/http_maxcdn.bootstrapcdn.com_bootstrap_4.0.0_js_bootstrap.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

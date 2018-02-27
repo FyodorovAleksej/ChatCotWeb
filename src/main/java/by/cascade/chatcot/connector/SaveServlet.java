@@ -19,23 +19,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class MainServlet extends HttpServlet {
-    private static final Logger LOGGER = LogManager.getLogger(MainServlet.class);
+public class SaveServlet extends HttpServlet {
+    private static final Logger LOGGER = LogManager.getLogger(SaveServlet.class);
     private static final String XML_PATH = "phrases.xml";
     private static final String LIST_XML_PATH = "lists.xml";
     private static final String UNKNOWN_PHRASE = "NEW";
     private PhraseAdapter adapter;
     private ListAdapter listAdapter;
 
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doOperation(request, response);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doOperation(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doOperation(request, response);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doOperation(req, resp);
     }
 
     private void doOperation(HttpServletRequest request, HttpServletResponse response) {
@@ -49,18 +48,10 @@ public class MainServlet extends HttpServlet {
         adapter = new XmlAdapter(getServletContext().getRealPath("") + XML_PATH, new XmlDomParser());
         BotProcessor botProcessor = BotProcessor.getInstance(adapter);
         listAdapter = new ListModelXmlAdapter(getServletContext().getRealPath("") + LIST_XML_PATH, new XmlDomListParser());
-        String quote = request.getParameter("quote");
-        request.setAttribute("oldPhrase", new CommandParser().removeArgs(quote));
-        ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter);
-        String answer = processor.doAction(quote);
-        LOGGER.info("answer = \"" + answer + "\"");
-        if (answer == null) {
-            LOGGER.info("null answer");
-            request.setAttribute("resp", "unknown phrase");
-            request.setAttribute("answer", UNKNOWN_PHRASE);
-        }
-        else {
-            request.setAttribute("answer", answer);
+        String oldPhrase = request.getParameter("oldPhrase");
+        if (oldPhrase != null) {
+            String type = request.getParameter("type");
+            botProcessor.save(type, oldPhrase);
         }
         try {
             request.getRequestDispatcher("/index.jsp").forward(request, response);
