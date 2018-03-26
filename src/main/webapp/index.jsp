@@ -27,6 +27,11 @@
 <fmt:message key="welcome" var="wel"/>
 <h2 class="text-center">${wel}</h2>
 <br/>
+<form action="sign" method="post">
+    <input type="text" class="text" name="login">
+    <input type="password" class="password-field" name="password">
+    <button type="submit" class="btn btn-primary">sign In</button>
+</form>
 <form>
 <select id="language" class="form-control" name="language" onchange="submit()">
     <option value="en" ${language == 'en' ? 'selected' : ''}>English</option>
@@ -37,12 +42,8 @@
 <form action="main" method="post" enctype="multipart/form-data">
     <input type="text" class="text" name="quote">
     <button type="submit" class="btn btn-primary">${se}</button>
-</form>
-<h1 class="alert-info"><fmt:message key="result" /> = ${answer}</h1>
-<fmt:message key="save" var="sa"/>
-<% if ("NEW".equals(request.getAttribute("answer"))) { %>
-<form action="main" method="post" enctype="multipart/form-data">
-    <select id="type" class="form-control" name="type">
+    <% if ("NEW".equals(request.getAttribute("answer"))) { %>
+    <select class="form-control" name="choiceType">
         <option value="standard greetings">standard greetings</option>
         <option value="special greetings">special greetings</option>
         <option value="question greetings">question greetings</option>
@@ -54,9 +55,9 @@
         <option value="filter">filter</option>
         <option value="adding">adding</option>
     </select>
-    <button type="submit" class="btn btn-primary">${sa}</button>
+    <% } %>
 </form>
-<% } %>
+<h1 class="alert-info"><fmt:message key="result" /> = ${answer}</h1>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="${request.contextPath}/WEB-INF/lib/http_code.jquery.com_jquery-3.2.1.slim.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

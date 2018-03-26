@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 
 public class SaveServlet extends HttpServlet {
     private static final Logger LOGGER = LogManager.getLogger(SaveServlet.class);
@@ -44,15 +45,11 @@ public class SaveServlet extends HttpServlet {
         } catch (UnsupportedEncodingException e) {
             LOGGER.catching(e);
         }
-        LOGGER.info("realPath = \"" + getServletContext().getRealPath("") + "\"");
+        LOGGER.info("Save servlet operation");
         adapter = new XmlAdapter(getServletContext().getRealPath("") + XML_PATH, new XmlDomParser());
         BotProcessor botProcessor = BotProcessor.getInstance(adapter);
         listAdapter = new ListModelXmlAdapter(getServletContext().getRealPath("") + LIST_XML_PATH, new XmlDomListParser());
-        String oldPhrase = request.getParameter("oldPhrase");
-        if (oldPhrase != null) {
-            String type = request.getParameter("type");
-            botProcessor.save(type, oldPhrase);
-        }
+
         try {
             request.getRequestDispatcher("/index.jsp").forward(request, response);
         } catch (ServletException | IOException e) {

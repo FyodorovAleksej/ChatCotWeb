@@ -3,7 +3,7 @@ package by.cascade.chatcot.storage.databaseprocessing.util;
 import java.sql.*;
 
 abstract public class SqlUtil {
-    public static Connection connection;
+    static Connection connection;
 
     /**
      * executing SQL request for getting result
