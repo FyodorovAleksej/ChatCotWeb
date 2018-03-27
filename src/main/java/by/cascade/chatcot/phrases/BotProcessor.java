@@ -1,7 +1,10 @@
 package by.cascade.chatcot.phrases;
 
+import by.cascade.chatcot.storage.ConnectorException;
+import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
+import by.cascade.chatcot.storage.databaseprocessing.util.ConnectionPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -115,7 +118,7 @@ public class BotProcessor {
         }
     }
 
-    public void loadPhrases() {
+    public void loadPhrases() throws DataBaseException {
         List<PhraseModel> list = adapter.listPhrases();
         for (PhraseModel entity : list) {
             if (types.contains(entity.getType())) {
@@ -124,7 +127,7 @@ public class BotProcessor {
         }
     }
 
-    public void initialize() {
+    public void initialize() throws DataBaseException {
         adapter.create();
         try {
             Thread.sleep(200);
@@ -238,21 +241,13 @@ public class BotProcessor {
 
     }
 
-    /**
-     * checking contains string into phrases
-     * @param in - input string for checking
-     * @param str - storage of phrases
-     * @return true - if str contains in
-     *         false - if str don't contains in
-     */
-    public boolean contains(String in, String[] str){
-        boolean match = false;
-        for (String aStr : str) {
-            if (aStr.equals(in)) {
-                match = true;
-            }
+    public void create() {
+        try {
+            adapter.create();
         }
-        return match;
+        catch (DataBaseException e) {
+            LOGGER.catching(e);
+        }
     }
 
     /**
@@ -260,22 +255,53 @@ public class BotProcessor {
      * @param quote - string from chat window
      * @return answer of Bot
      */
-    public String check(String quote) {
+    public String check(String quote) throws DataBaseException {
         LOGGER.info("checking in storage quote = \"" + quote + "\"");
         return adapter.findPhrase(quote);
     }
 
-    public String save(String type, String quote) {
+    /**
+     * saving quote in storage
+     * @param type - type of quote
+     * @param quote - quote for save
+     * @return - result of saving
+     */
+    public String save(String type, String quote) throws DataBaseException {
         LOGGER.info("adding in storage: (type = \"" + type + "\"; quote = \"" + quote + "\")");
         adapter.addPhrase(type, quote);
         return "phrase was successfully added: (type = \"" + type + "\"; phrase = \"" + quote + "\");";
     }
 
-    public void shutdown() {
-        this.adapter.shutdown();
+    public void open() {
+        adapter.refresh();
     }
 
-    public String getRandom(String type) {
+    public void close() {
+        try {
+            this.adapter.shutdown();
+        } catch (DataBaseException e) {
+            LOGGER.catching(e);
+        }
+    }
+
+    /**
+     * close all connections for system exit
+     */
+    public void shutdown() throws DataBaseException {
+        this.adapter.shutdown();
+        try {
+            ConnectionPool.getInstance().destroy();
+        } catch (ConnectorException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * getting random phrase with a input type
+     * @param type - type of phrase
+     * @return - random phrase
+     */
+    public String getRandom(String type) throws DataBaseException {
         LinkedList<PhraseModel> list = this.adapter.findType(type);
         Random random = new Random();
         int index = random.nextInt(list.size() - 1);

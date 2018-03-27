@@ -422,4 +422,9 @@ public class XmlAdapter implements PhraseAdapter {
         } while (phrase != null);
         return phrases;
     }
+
+    @Override
+    public void refresh() {
+
+    }
 }

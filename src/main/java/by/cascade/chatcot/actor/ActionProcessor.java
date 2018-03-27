@@ -1,6 +1,7 @@
 package by.cascade.chatcot.actor;
 
 import by.cascade.chatcot.phrases.BotProcessor;
+import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListModel;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,7 @@ public class ActionProcessor {
      * @param action - command for performing
      * @return - result of performing
      */
-    public String doAction(String action) {
+    public String doAction(String action) throws DataBaseException {
         LOGGER.info("do action = " + action);
         if (INITIALIZE.equals(action)) {
             doInitialize();
@@ -48,7 +49,10 @@ public class ActionProcessor {
         CommandParser parser = new CommandParser();
         LinkedList<String> arguments = parser.parse(action);
         action = parser.removeArgs(action);
-        return mapping(bot.check(action), arguments);
+        bot.open();
+        String result = mapping(bot.check(action), arguments);
+        bot.close();
+        return result;
     }
 
     /**
@@ -57,7 +61,7 @@ public class ActionProcessor {
      * @param arguments - arguments of command
      * @return - result of performing
      */
-    private String mapping(String action, LinkedList<String> arguments) {
+    private String mapping(String action, LinkedList<String> arguments) throws DataBaseException {
                if (GREETING_STANDARD_COMMAND.getCommand().equals(action)) {
                    return doGreetingStandard();
         } else if (GREETING_SPECIAL_COMMAND.getCommand().equals(action)) {
@@ -85,7 +89,7 @@ public class ActionProcessor {
      * performing standard greeting
      * @return - result of operation - greeting answer
      */
-    private String doGreetingStandard() {
+    private String doGreetingStandard() throws DataBaseException {
         LOGGER.info("do greeting standard");
         return bot.getRandom(GREETING_STANDARD_COMMAND.getCommand());
     }
@@ -104,7 +108,7 @@ public class ActionProcessor {
      * performing question greeting
      * @return - result of operation - greeting answer
      */
-    private String doGreetingQuestion() {
+    private String doGreetingQuestion() throws DataBaseException {
         LOGGER.info("do greeting question");
         return bot.getRandom(GREETING_ANSWER_COMMAND.getCommand());
     }
@@ -113,7 +117,7 @@ public class ActionProcessor {
      * performing standard greeting
      * @return - result of operation - greeting answer
      */
-    private String doGreetingAnswer() {
+    private String doGreetingAnswer() throws DataBaseException {
         LOGGER.info("do greeting answer");
         return bot.getRandom(YES_COMMAND.getCommand());
     }
@@ -152,7 +156,7 @@ public class ActionProcessor {
      * performing initialize of DataBase or XML
      * @return - result of operation - message from initialization
      */
-    private String doInitialize() {
+    private String doInitialize() throws DataBaseException {
         LOGGER.info("do initialize");
         bot.initialize();
         return "Initialize Successful";

@@ -51,12 +51,7 @@ public class PhraseModel {
         if (o == null || getClass() != o.getClass()) return false;
 
         PhraseModel that = (PhraseModel) o;
-
-        if (id != that.id) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (phrase != null ? !phrase.equals(that.phrase) : that.phrase != null) return false;
-
-        return true;
+        return id == that.id && (type != null ? type.equals(that.type) : that.type == null) && (phrase != null ? phrase.equals(that.phrase) : that.phrase == null);
     }
 
     @Override

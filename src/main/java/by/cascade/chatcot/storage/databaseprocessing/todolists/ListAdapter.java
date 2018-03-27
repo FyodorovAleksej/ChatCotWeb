@@ -30,7 +30,8 @@ public interface ListAdapter {
                     String text = set.getString(3);
                     String description = set.getString(4);
                     int user = set.getInt(5);
-                    list.add(new ListModel(id, date, text, description, user));
+                    boolean check = set.getBoolean(6);
+                    list.add(new ListModel(id, date, text, description, user, check));
                 }
                 set.close();
                 return list;
