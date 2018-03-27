@@ -2,11 +2,13 @@ package by.cascade.chatcot.storage.databaseprocessing.user.mysql;
 
 import by.cascade.chatcot.storage.databaseprocessing.user.PasswordEncrypt;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
+import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
 import by.cascade.chatcot.storage.databaseprocessing.util.MySqlUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.ResultSet;
+import java.util.LinkedList;
 
 public class UserMySqlAdapter implements UserAdapter {
     private static final Logger LOGGER = LogManager.getLogger(UserMySqlAdapter.class);
@@ -22,7 +24,7 @@ public class UserMySqlAdapter implements UserAdapter {
 
 
     public UserMySqlAdapter() {
-        util = new MySqlUtil(SCHEME_NAME);
+        util = new MySqlUtil();
         LOGGER.info("creating MySQL Adapter");
     }
 
@@ -51,8 +53,17 @@ public class UserMySqlAdapter implements UserAdapter {
     @Override
     public boolean checkUser(String name, String password) {
         PasswordEncrypt encrypt = new PasswordEncrypt();
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = \"" + name + "\" " + PASSWORD_COLUMN + " = \"" + encrypt.encrypt(password) + "\";");
-        LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
-        return (UserAdapter.getPhraseModels(set, LOGGER) != null);
+        ResultSet set = util.execPrepare("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = ? AND " + PASSWORD_COLUMN + " = ?;", name, encrypt.encrypt(password));
+        LOGGER.info("Find user by login and password from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME+")");
+        LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
+        return (list != null && !list.isEmpty());
+    }
+
+    @Override
+    public boolean checkLogin(String name) {
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = \"" + name + "\" ;");
+        LOGGER.info("Find user by login from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
+        LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
+        return (list != null && !list.isEmpty());
     }
 }

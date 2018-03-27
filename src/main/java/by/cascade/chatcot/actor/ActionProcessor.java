@@ -41,6 +41,7 @@ public class ActionProcessor {
      * @return - result of performing
      */
     public String doAction(String action) {
+        LOGGER.info("do action = " + action);
         if (INITIALIZE.equals(action)) {
             doInitialize();
         }

@@ -20,18 +20,23 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <title>Hello, world!</title>
+    <title>ChatCot</title>
 </head>
 <body>
 <br/>
 <fmt:message key="welcome" var="wel"/>
 <h2 class="text-center">${wel}</h2>
 <br/>
-<form action="sign" method="post">
+<form action="login" method="post">
     <input type="text" class="text" name="login">
     <input type="password" class="password-field" name="password">
-    <button type="submit" class="btn btn-primary">sign In</button>
+    <button type="submit" class="btn btn-primary">login</button>
+    <button type="button" class="btn btn-primary" onClick='location.href="pages/register.jsp"'>sign up</button>
 </form>
+<h4>${loginResult}</h4>
+<h4>${registerResult}</h4>
+<br/>
+
 <form>
 <select id="language" class="form-control" name="language" onchange="submit()">
     <option value="en" ${language == 'en' ? 'selected' : ''}>English</option>
@@ -39,7 +44,7 @@
 </select>
 </form>
 <fmt:message key="send" var="se"/>
-<form action="main" method="post" enctype="multipart/form-data">
+<form action="main" method="post">
     <input type="text" class="text" name="quote">
     <button type="submit" class="btn btn-primary">${se}</button>
     <% if ("NEW".equals(request.getAttribute("answer"))) { %>

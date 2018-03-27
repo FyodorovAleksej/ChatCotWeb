@@ -28,7 +28,7 @@ public class MySqlAdapter implements PhraseAdapter {
 
 
     public MySqlAdapter() {
-        util = new MySqlUtil(SCHEME_NAME);
+        util = new MySqlUtil();
         LOGGER.info("creating MySQL Adapter");
     }
 

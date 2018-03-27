@@ -9,6 +9,7 @@ import java.util.LinkedList;
 public interface UserAdapter {
     void addUser(String name, String password);
     boolean checkUser(String name, String password);
+    boolean checkLogin(String name);
     void shutdown();
     void create();
 

@@ -10,6 +10,8 @@ import by.cascade.chatcot.storage.databaseprocessing.phrases.xml.XmlDomParser;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.ListModelXmlAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.XmlDomListParser;
+import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
+import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,11 +30,12 @@ public class MainServlet extends HttpServlet {
     private static final String UNKNOWN_PHRASE = "NEW";
     private PhraseAdapter adapter;
     private ListAdapter listAdapter;
+    private BotProcessor botProcessor;
 
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doOperation(request, response);
+        super.doGet(request, response);
     }
 
     @Override
@@ -47,19 +50,12 @@ public class MainServlet extends HttpServlet {
         } catch (UnsupportedEncodingException e) {
             LOGGER.catching(e);
         }
-        LOGGER.info("realPath = \"" + getServletContext().getRealPath("") + "\"");
-        adapter = new MySqlAdapter();
-        BotProcessor botProcessor = BotProcessor.getInstance(adapter);
-        listAdapter = new ListModelXmlAdapter(getServletContext().getRealPath("") + LIST_XML_PATH, new XmlDomListParser());
 
+        LOGGER.info("realPath = \"" + getServletContext().getRealPath("") + "\"");
         String oldPhrase = (String) getServletContext().getAttribute("oldPhrase");
+
         LOGGER.info("trying to saving phrase = \"" + oldPhrase + "\"");
         if (oldPhrase != null) {
-
-            Enumeration<String> enumeration = request.getParameterNames();
-            while (enumeration.hasMoreElements()) {
-                LOGGER.info(enumeration.nextElement());
-            }
             String type = request.getParameter("choiceType");
             LOGGER.info("save phrase = \"" + oldPhrase + "\" with type = \"" + type +"\"");
             botProcessor.save(type, oldPhrase);
@@ -67,17 +63,20 @@ public class MainServlet extends HttpServlet {
         }
         else {
             String quote = request.getParameter("quote");
-            ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter);
-            String answer = processor.doAction(quote);
-            LOGGER.info("answer = \"" + answer + "\"");
-            if (answer == null) {
-                LOGGER.info("null answer");
-                request.setAttribute("resp", "unknown phrase");
-                request.setAttribute("answer", UNKNOWN_PHRASE);
-                getServletContext().setAttribute("oldPhrase", new CommandParser().removeArgs(quote));
-            } else {
-                request.setAttribute("answer", answer);
-                getServletContext().setAttribute("oldPhrase", null);
+            if (quote != null) {
+                LOGGER.info("action");
+                ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter);
+                String answer = processor.doAction(quote);
+                LOGGER.info("answer = \"" + answer + "\"");
+                if (answer == null) {
+                    LOGGER.info("null answer");
+                    request.setAttribute("resp", "unknown phrase");
+                    request.setAttribute("answer", UNKNOWN_PHRASE);
+                    getServletContext().setAttribute("oldPhrase", new CommandParser().removeArgs(quote));
+                } else {
+                    request.setAttribute("answer", answer);
+                    getServletContext().setAttribute("oldPhrase", null);
+                }
             }
         }
         goTo("/index.jsp", request, response);
@@ -89,5 +88,22 @@ public class MainServlet extends HttpServlet {
         } catch (ServletException | IOException e) {
             LOGGER.catching(e);
         }
+    }
+
+    @Override
+    public void init() throws ServletException {
+        adapter = new MySqlAdapter();
+        botProcessor = BotProcessor.getInstance(adapter);
+        listAdapter = new ListModelXmlAdapter(getServletContext().getRealPath("") + LIST_XML_PATH, new XmlDomListParser());
+        UserAdapter userAdapter = new UserMySqlAdapter();
+        userAdapter.create();
+        userAdapter.shutdown();
+    }
+
+    @Override
+    public void destroy() {
+        adapter.shutdown();
+        listAdapter.shutdown();
+        botProcessor.shutdown();
     }
 }

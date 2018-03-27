@@ -38,4 +38,22 @@ abstract public class SqlUtil {
         }
         return -1;
     }
+
+    public ResultSet execPrepare(String sqlRequest, String... strings) {
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement statement = connection.prepareStatement(sqlRequest);
+            statement.closeOnCompletion();
+            for (int i = 0; i < strings.length; i++) {
+                statement.setString(i + 1, strings[i]);
+            }
+            connection.commit();
+            connection.setAutoCommit(true);
+            return statement.executeQuery();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

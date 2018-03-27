@@ -1,5 +1,6 @@
 package by.cascade.chatcot.storage.databaseprocessing.util;
 
+import by.cascade.chatcot.storage.ConnectorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,13 +18,10 @@ public class MySqlUtil extends SqlUtil {
     private static final String URL = "jdbc:mysql://localhost:3306/";
     private static final String PATH = "db.properties";
 
-    public MySqlUtil(String scheme) {
+
+    public MySqlUtil() {
         try {
-            DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
-            Properties properties = new Properties();
-            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH));
-            LOGGER.info("Connecting to MySQL : (URL = " + URL + scheme + ", properties = " + properties + ").......");
-            connection = DriverManager.getConnection(URL + scheme, properties);
+            connection = ConnectionPool.getInstance().getConnection();
             if (connection != null) {
                 LOGGER.info("Connection successfully");
             }
@@ -31,7 +29,7 @@ public class MySqlUtil extends SqlUtil {
                 LOGGER.info("Connection not successfully");
             }
         }
-        catch (SQLException | IOException e) {
+        catch (SQLException e) {
             LOGGER.error("Connection failed - " + e.getMessage());
             throw new RuntimeException(e);
         }
@@ -46,6 +44,12 @@ public class MySqlUtil extends SqlUtil {
     public ResultSet exec(String sqlRequest) {
         LOGGER.info("executing MySQL query = \"" + sqlRequest + "\"....");
         return super.exec(sqlRequest);
+    }
+
+    @Override
+    public ResultSet execPrepare(String sqlRequest, String... strings) {
+        LOGGER.info("executing MySQL prepare query = \"" + sqlRequest + "\"....");
+        return super.execPrepare(sqlRequest, strings);
     }
 
     /**
@@ -67,7 +71,7 @@ public class MySqlUtil extends SqlUtil {
             LOGGER.info("closing MySQL connection to DataBase....");
             connection.close();
             LOGGER.info("MySQL connection was closed");
-            DriverManager.deregisterDriver(new com.mysql.cj.jdbc.Driver());
+            ConnectionPool.getInstance().releaseConnection((ProxyConnection) connection);
         } catch (SQLException e) {
             e.printStackTrace();
             LOGGER.error("can't close MySQL connection to DataBase");
