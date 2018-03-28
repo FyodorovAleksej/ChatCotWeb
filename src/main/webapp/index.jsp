@@ -67,11 +67,12 @@
         <option value="default">default</option>
         <option value="initialize">initialize</option>
         <option value="filter">filter</option>
+        <option value="filter by check">filter check</option>
         <option value="adding">adding</option>
     </select>
     <% } %>
 </form>
-<h1 class="alert-info"><fmt:message key="result" /> = ${answer}</h1>
+<h1 class="alert-info"><fmt:message key="result" />: </h1>${answer}
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="${request.contextPath}/WEB-INF/lib/http_code.jquery.com_jquery-3.2.1.slim.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

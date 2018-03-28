@@ -21,12 +21,12 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
 
     private MySqlUtil util;
 
-    private final String SCHEME_NAME = "phr";
-    private final String TABLE_NAME = "phrases";
-
-    private final String ID_COLUMN = "id";
-    private final String TYPE_COLUMN = "type";
-    private final String PHRASE_COLUMN = "phrase";
+    private static final String SCHEME_NAME = "phr";
+    private static final String TABLE_NAME = "phrases";
+    private static final String ID_COLUMN = "id";
+    private static final String TYPE_COLUMN = "type";
+    private static final String PHRASE_COLUMN = "phrase";
+    private static final String OWNER_COLUMN = "owner";
 
 
     public PhrasesMySqlAdapter() throws DataBaseException {
@@ -52,8 +52,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      * @param phrase - phrase
      */
     @Override
-    public void addPhrase(String type, String phrase) throws DataBaseException {
-        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + TABLE_NAME + "(" + TYPE_COLUMN + ", " + PHRASE_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\");");
+    public void addPhrase(String type, String phrase, int owner) throws DataBaseException {
+        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + TABLE_NAME + "(" + TYPE_COLUMN + ", " + PHRASE_COLUMN + ", " + OWNER_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ");");
         LOGGER.info("Adding new phrase : (type = " + type + ", phrase = " + phrase + ") into (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
     }
 
@@ -124,7 +124,7 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
             LOGGER.info("scheme \"" + SCHEME_NAME + "\" is exist");
         }
         try {
-            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + TABLE_NAME + " (" + ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + TYPE_COLUMN + " VARCHAR(100) NOT NULL, " + PHRASE_COLUMN + " VARCHAR(200) NOT NULL, PRIMARY KEY(id), UNIQUE INDEX " + ID_COLUMN + "_UNIQUE (" + ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
+            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + TABLE_NAME + " (" + ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + TYPE_COLUMN + " VARCHAR(100) NOT NULL, " + PHRASE_COLUMN + " VARCHAR(200) NOT NULL, " + OWNER_COLUMN + " INT, PRIMARY KEY(id), UNIQUE INDEX " + ID_COLUMN + "_UNIQUE (" + ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
         }
         catch (DataBaseException e) {
             LOGGER.info("table \"" + SCHEME_NAME + "." + TABLE_NAME + "\" is exist");

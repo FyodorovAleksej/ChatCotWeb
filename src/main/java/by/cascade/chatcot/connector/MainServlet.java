@@ -9,7 +9,9 @@ import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlA
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.ListModelXmlAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.XmlDomListParser;
+import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
+import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,19 +55,30 @@ public class MainServlet extends HttpServlet {
 
             LOGGER.info("realPath = \"" + getServletContext().getRealPath("") + "\"");
             String oldPhrase = (String) getServletContext().getAttribute("oldPhrase");
+            String userName = (String)request.getSession().getAttribute("userName");
+            int owner = -1;
+            if (userName != null) {
+                UserAdapter userAdapter = new UserMySqlAdapter();
+                UserModel user = userAdapter.getUser(userName);
+                if (user != null) {
+                    owner = user.getId();
+                }
+                userAdapter.shutdown();
+            }
             botProcessor.open();
 
             LOGGER.info("trying to saving phrase = \"" + oldPhrase + "\"");
             if (oldPhrase != null) {
                 String type = request.getParameter("choiceType");
                 LOGGER.info("save phrase = \"" + oldPhrase + "\" with type = \"" + type + "\"");
-                botProcessor.save(type, oldPhrase);
+                String answer = botProcessor.save(type, oldPhrase, owner);
+                request.setAttribute("answer", answer);
                 getServletContext().setAttribute("oldPhrase", null);
             } else {
                 String quote = request.getParameter("quote");
                 if (quote != null) {
                     LOGGER.info("action");
-                    ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter);
+                    ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter, owner);
                     String answer = processor.doAction(quote);
                     LOGGER.info("answer = \"" + answer + "\"");
                     if (answer == null) {

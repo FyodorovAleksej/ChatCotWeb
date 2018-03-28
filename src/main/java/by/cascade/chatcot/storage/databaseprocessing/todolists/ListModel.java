@@ -87,4 +87,24 @@ public class ListModel {
     public String toString() {
         return "(id = " + id + "; date = (" + date + "); text = \"" + text + "\"; description = \"" + description + "\"; owner = " + owner + "; check = " + check + ")";
     }
+
+    public String toHTML() {
+        return "<tr>" +
+                "<th>" + getId() + "</th>" +
+                "<th>" + getDate() +"</th>" +
+                "<th>" + getText() +"</th>" +
+                "<th>" + getDescription() + "</th>" +
+                "<th>" + getCheck() + "</th>" +
+                "</tr>";
+    }
+
+    public static String getHtmlTableHeader() {
+        return  "<tr>" +
+                "<th>" + "id" + "</th>" +
+                "<th>" + "date" + "</th>" +
+                "<th>" + "text" + "</th>" +
+                "<th>" + "description" + "</th>" +
+                "<th>" + "check" + "</th>" +
+                "</tr>";
+    }
 }

@@ -24,15 +24,17 @@ public class ActionProcessor {
     private static final String DATE_FORMAT = "dd.MM.yyyy";
     private BotProcessor bot;
     private ListAdapter listAdapter;
+    private int owner;
 
     /**
      * creating processor for performing operations from main servlet
      * @param bot - chat bot, that used for performing operations
      * @param listAdapter - list adapter for performing operations with to-do list
      */
-    public ActionProcessor(BotProcessor bot, ListAdapter listAdapter) {
+    public ActionProcessor(BotProcessor bot, ListAdapter listAdapter, int owner) {
         this.bot = bot;
         this.listAdapter = listAdapter;
+        this.owner = owner;
     }
 
     /**
@@ -78,6 +80,8 @@ public class ActionProcessor {
                    return doInitialize();
         } else if (FILTER_COMMAND.getCommand().equals(action)) {
                    return doFilter(action, arguments);
+        } else if (FILTER_COMMAND_BY_CHECK.getCommand().equals(action)) {
+                   return doFilterByCheck(action, arguments);
         } else if (ADDING_COMMAND.getCommand().equals(action)) {
                    return doAdding(action, arguments);
         } else {
@@ -172,21 +176,46 @@ public class ActionProcessor {
      */
     private String doFilter(String action, LinkedList<String> arguments) {
         LOGGER.info("do filter");
-        if (arguments.size() <= ADDING_COMMAND.getArguments()) {
+        if (arguments.size() == FILTER_COMMAND.getArguments()) {
             SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
             try {
                 LOGGER.info("since = (" + format.parse(arguments.get(0)).toString() + ")");
                 LOGGER.info("until = (" + format.parse(arguments.get(1)).toString() + ")");
-                LinkedList<ListModel> list = listAdapter.filterTaskes(format.parse(arguments.get(0)), format.parse(arguments.get(1)));
-                StringBuilder builder = new StringBuilder();
+                LinkedList<ListModel> list = listAdapter.filterTaskes(format.parse(arguments.get(0)), format.parse(arguments.get(1)), owner);
+                StringBuilder builder = new StringBuilder("<table border=\"1\">\n" +
+                        "<caption><fmt:message key=\"todo lists\"/></caption>\n" +
+                        "<br/>");
+                builder.append(ListModel.getHtmlTableHeader());
                 for (ListModel model : list) {
-                    builder.append(model.toString()).append("<br>");
+                    builder.append(model.toHTML());
                 }
+                builder.append("</table>");
                 return builder.toString();
             } catch (ParseException e) {
                 LOGGER.catching(e);
                 return "INVALID ARGUMENT FOR FILTER";
             }
+        }
+        return action;
+    }
+
+    private String doFilterByCheck(String action, LinkedList<String> arguments) {
+        LOGGER.info("do filter");
+        if (arguments.size() <= FILTER_COMMAND_BY_CHECK.getArguments()) {
+            LOGGER.info("filter by check (" + arguments.get(0) + ")");
+            if (!validateBoolean(arguments.get(0))) {
+                return "INVALID ARGUMENT FOR FILTER BY CHECK";
+            }
+            LinkedList<ListModel> list = listAdapter.filterTaskesByCheck(Boolean.valueOf(arguments.get(0)), owner);
+            StringBuilder builder = new StringBuilder("<table border=\"1\">\n" +
+                    "<caption><fmt:message key=\"todo lists\"/></caption>\n" +
+                    "<br/>");
+            builder.append(ListModel.getHtmlTableHeader());
+            for (ListModel model : list) {
+                builder.append(model.toHTML());
+            }
+            builder.append("</table>");
+            return builder.toString();
         }
         return action;
     }
@@ -202,11 +231,16 @@ public class ActionProcessor {
      */
     private String doAdding(String action, LinkedList<String> arguments) {
         if (arguments.size() <= ADDING_COMMAND.getArguments()) {
-            listAdapter.addTask(arguments.get(0), arguments.get(1), 0);
+            listAdapter.addTask(arguments.get(0), arguments.get(1), owner);
             return doYes(action);
         }
         else {
             return doNo(action);
         }
+    }
+
+
+    private boolean validateBoolean(String input) {
+        return "true".equalsIgnoreCase(input) || "false".equalsIgnoreCase(input);
     }
 }

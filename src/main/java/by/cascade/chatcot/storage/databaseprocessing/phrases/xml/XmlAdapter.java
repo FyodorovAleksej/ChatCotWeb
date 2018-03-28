@@ -307,9 +307,9 @@ public class XmlAdapter implements PhraseAdapter {
      * @param phrase - phrase
      */
     @Override
-    public void addPhrase(String type, String phrase) {
+    public void addPhrase(String type, String phrase, int owner) {
         LOGGER.info("adding new phrase : (type = \"" + type + "\", phrase = \"" + phrase + "\")");
-        addInEnd(new PhraseModel(type, phrase));
+        addInEnd(new PhraseModel(type, phrase, owner));
     }
 
     /**

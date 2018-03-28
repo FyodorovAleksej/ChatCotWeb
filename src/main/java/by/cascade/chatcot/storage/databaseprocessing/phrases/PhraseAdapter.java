@@ -17,7 +17,7 @@ import java.util.List;
  * - file
  */
 public interface PhraseAdapter {
-    void addPhrase(String type, String phrase) throws DataBaseException;
+    void addPhrase(String type, String phrase, int owner) throws DataBaseException;
     List<PhraseModel> listPhrases() throws DataBaseException;
     void deletePhrases(List<PhraseModel> list) throws DataBaseException;
     void deleteId(PhraseModel model) throws DataBaseException;
@@ -37,7 +37,8 @@ public interface PhraseAdapter {
                     int id = set.getInt(1);
                     String type = set.getString(2);
                     String phrase = set.getString(3);
-                    list.add(new PhraseModel(id, type, phrase));
+                    int owner = set.getInt(4);
+                    list.add(new PhraseModel(id, type, phrase, owner));
                 }
                 set.close();
                 return list;
