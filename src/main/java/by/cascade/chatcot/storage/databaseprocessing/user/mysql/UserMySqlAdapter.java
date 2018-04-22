@@ -16,12 +16,13 @@ public class UserMySqlAdapter implements UserAdapter {
 
     private MySqlUtil util;
 
-    private final String SCHEME_NAME = "usr";
-    private final String TABLE_NAME = "users";
+    public static final String USER_SCHEME_NAME = "chatcot";
+    public static final String USER_TABLE_NAME = "users";
 
-    private final String ID_COLUMN = "id";
-    private final String NAME_COLUMN = "login";
-    private final String PASSWORD_COLUMN = "password";
+    public static final String USER_ID_COLUMN = "userId";
+    public static final String USER_NAME_COLUMN = "login";
+    public static final String USER_EMAIL_COLUMN = "email";
+    public static final String USER_PASSWORD_COLUMN = "password";
 
 
     public UserMySqlAdapter() throws DataBaseException {
@@ -40,23 +41,13 @@ public class UserMySqlAdapter implements UserAdapter {
 
     @Override
     public void create() throws DataBaseException {
-        try {
-            util.execUpdate("CREATE SCHEMA IF NOT EXISTS " + SCHEME_NAME + " DEFAULT CHARACTER SET utf8;");
-        }
-        catch (DataBaseException e) {
-            LOGGER.info("don't need to create scheme");
-        }
-        try {
-            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + TABLE_NAME + " (" + ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + NAME_COLUMN + " VARCHAR(100) NOT NULL, " + PASSWORD_COLUMN + " VARCHAR(100) NOT NULL, PRIMARY KEY(id), UNIQUE INDEX " + ID_COLUMN + "_UNIQUE (" + ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
-        } catch (DataBaseException e) {
-            LOGGER.info("don't need to create table");
-        }
+
     }
 
     @Override
     public UserModel getUser(String name) throws DataBaseException {
-        ResultSet set = util.execPrepare("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = ?;", name);
-        LOGGER.info("Find user by login from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME+")");
+        ResultSet set = util.execPrepare("SELECT * FROM " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + " WHERE " + USER_NAME_COLUMN + " = ?;", name);
+        LOGGER.info("Find user by login from (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME +")");
         LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
         if (list != null && !list.isEmpty()) {
             return list.getFirst();
@@ -65,17 +56,16 @@ public class UserMySqlAdapter implements UserAdapter {
     }
 
     @Override
-    public void addUser(String name, String password) throws DataBaseException {
-        PasswordEncrypt encrypt = new PasswordEncrypt();
-        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + TABLE_NAME + "(" + NAME_COLUMN + ", " + PASSWORD_COLUMN + ")" + " VALUES " + "(\"" + name + "\", \"" + encrypt.encrypt(password) + "\");");
-        LOGGER.info("Adding new user : (name = " + name + ") into (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+    public void addUser(String name, String email, String password) throws DataBaseException {
+        util.execUpdate("INSERT INTO " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + "(" + USER_NAME_COLUMN + ", " + USER_EMAIL_COLUMN + ", " + USER_PASSWORD_COLUMN + ")" + " VALUES " + "(\"" + name + "\", \"" + email + "\", \"" + password + "\");");
+        LOGGER.info("Adding new user : (name = " + name + ") into (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME + ")");
     }
 
     @Override
     public UserModel checkUser(String name, String password) throws DataBaseException {
         PasswordEncrypt encrypt = new PasswordEncrypt();
-        ResultSet set = util.execPrepare("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = ? AND " + PASSWORD_COLUMN + " = ?;", name, encrypt.encrypt(password));
-        LOGGER.info("Find user by login and password from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME+")");
+        ResultSet set = util.execPrepare("SELECT * FROM " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + " WHERE " + USER_NAME_COLUMN + " = ? AND " + USER_PASSWORD_COLUMN + " = ?;", name, encrypt.encrypt(password));
+        LOGGER.info("Find user by login and password from (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME +")");
         LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
         if (list != null && !list.isEmpty()) {
             return list.getFirst();
@@ -85,8 +75,8 @@ public class UserMySqlAdapter implements UserAdapter {
 
     @Override
     public boolean checkLogin(String name) throws DataBaseException {
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + NAME_COLUMN + " = \"" + name + "\" ;");
-        LOGGER.info("Find user by login from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
+        ResultSet set = util.exec("SELECT * FROM " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + " WHERE " + USER_NAME_COLUMN + " = \"" + name + "\" ;");
+        LOGGER.info("Find user by login from (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME);
         LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
         return (list != null && !list.isEmpty());
     }

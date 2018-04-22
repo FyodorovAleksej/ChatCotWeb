@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 
 public interface UserAdapter {
-    void addUser(String name, String password) throws DataBaseException;
+    void addUser(String name, String email, String password) throws DataBaseException;
     UserModel checkUser(String name, String password) throws DataBaseException;
     boolean checkLogin(String name) throws DataBaseException;
     void shutdown() throws DataBaseException ;
@@ -22,8 +22,9 @@ public interface UserAdapter {
                 while (set.next()) {
                     int id = set.getInt(1);
                     String name = set.getString(2);
-                    String password = set.getString(3);
-                    list.add(new UserModel(id, name, password));
+                    String email = set.getString(3);
+                    String password = set.getString(4);
+                    list.add(new UserModel(id, name, email, password));
                 }
                 set.close();
                 return list;

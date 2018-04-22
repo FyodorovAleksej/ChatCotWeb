@@ -16,7 +16,7 @@ import static by.cascade.chatcot.storage.databaseprocessing.phrases.xml.XmlConst
 /**
  * XmlAdapter - class for working with phrases by using XML file
  */
-public class XmlAdapter implements PhraseAdapter {
+public class XmlAdapter {//implements PhraseAdapter {
     private static final Logger LOGGER = LogManager.getLogger(XmlAdapter.class);
 
     private PhraseParsable parser;
@@ -306,7 +306,7 @@ public class XmlAdapter implements PhraseAdapter {
      * @param type - type
      * @param phrase - phrase
      */
-    @Override
+    //@Override
     public void addPhrase(String type, String phrase, int owner) {
         LOGGER.info("adding new phrase : (type = \"" + type + "\", phrase = \"" + phrase + "\")");
         addInEnd(new PhraseModel(type, phrase, owner));
@@ -316,7 +316,7 @@ public class XmlAdapter implements PhraseAdapter {
      * getting all phrases from XML file
      * @return - list of all phrases
      */
-    @Override
+    //@Override
     public List<PhraseModel> listPhrases() {
         LOGGER.info("getting list of phrases");
         return getList();
@@ -326,7 +326,7 @@ public class XmlAdapter implements PhraseAdapter {
      * deleting all phrases in list from XML file
      * @param list - list of phrases to deleting
      */
-    @Override
+    //@Override
     public void deletePhrases(List<PhraseModel> list) {
         LOGGER.info("delete list");
         for (PhraseModel model : list) {
@@ -338,7 +338,7 @@ public class XmlAdapter implements PhraseAdapter {
      * deleting by id from XML file
      * @param model - model with id
      */
-    @Override
+    //@Override
     public void deleteId(PhraseModel model) {
         delete(model.getId());
     }
@@ -347,7 +347,7 @@ public class XmlAdapter implements PhraseAdapter {
      * deleting by phrase from XML file
      * @param model - model with phrase
      */
-    @Override
+    //@Override
     public void deletePhrase(PhraseModel model) {
         delete(findIndexByPhrase(model.getPhrase()));
     }
@@ -356,7 +356,7 @@ public class XmlAdapter implements PhraseAdapter {
      * deleting model from XML file
      * @param model - model for deleting from XML file
      */
-    @Override
+    //@Override
     public void deleteModel(PhraseModel model) {
         deletePhrase(model);
     }
@@ -364,7 +364,7 @@ public class XmlAdapter implements PhraseAdapter {
     /**
      * close application action
      */
-    @Override
+    //@Override
     public void shutdown() {
 
     }
@@ -372,7 +372,7 @@ public class XmlAdapter implements PhraseAdapter {
     /**
      * creating XML file
      */
-    @Override
+    //@Override
     public void create() {
         LOGGER.info("creating XML file for path: \"" + path + "\"");
         try {
@@ -386,7 +386,7 @@ public class XmlAdapter implements PhraseAdapter {
         }
     }
 
-    @Override
+    //@Override
     public String findPhrase(String quote) {
         LOGGER.info("finding by phrase = \"" + quote + "\"");
         PhraseModel phrase;
@@ -405,7 +405,7 @@ public class XmlAdapter implements PhraseAdapter {
         return null;
     }
 
-    @Override
+    //@Override
     public LinkedList<PhraseModel> findType(String type) {
         LOGGER.info("finding by type = \"" + type + "\"");
         LinkedList<PhraseModel> phrases = new LinkedList<>();
@@ -423,7 +423,7 @@ public class XmlAdapter implements PhraseAdapter {
         return phrases;
     }
 
-    @Override
+    //@Override
     public void refresh() {
 
     }

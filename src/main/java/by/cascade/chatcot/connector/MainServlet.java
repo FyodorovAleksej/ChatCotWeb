@@ -5,6 +5,7 @@ import by.cascade.chatcot.actor.CommandParser;
 import by.cascade.chatcot.phrases.BotProcessor;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
+import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.ListModelXmlAdapter;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.LinkedList;
 
 /**
  * Servlet of main page
@@ -72,6 +74,13 @@ public class MainServlet extends HttpServlet {
                 String type = request.getParameter("choiceType");
                 LOGGER.info("save phrase = \"" + oldPhrase + "\" with type = \"" + type + "\"");
                 String answer = botProcessor.save(type, oldPhrase, owner);
+                LinkedList<PhraseModel> phrases = adapter.findByOwner(userName);
+                if (phrases != null && !phrases.isEmpty()) {
+                    request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
+                }
+                else {
+                    request.getSession().setAttribute("userScore", Integer.toString(0));
+                }
                 request.setAttribute("answer", answer);
                 getServletContext().setAttribute("oldPhrase", null);
             } else {

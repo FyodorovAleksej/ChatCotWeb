@@ -8,12 +8,15 @@ public class UserModel {
     private int id;
     @JsonProperty("name")
     private String name;
+    @JsonProperty("email")
+    private String email;
     @JsonIgnore
     private String password;
 
-    public UserModel(int id, String name, String password) {
+    public UserModel(int id, String email, String name, String password) {
         this.id = id;
         this.name = name;
+        this.email = email;
         PasswordEncrypt encrypt = new PasswordEncrypt();
         this.password = encrypt.encrypt(password);
     }
@@ -23,6 +26,12 @@ public class UserModel {
     }
     public String getName() {
         return name;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public String getPassword() {
+        return password;
     }
     public boolean checkPassword(String password) {
         PasswordEncrypt encrypt = new PasswordEncrypt();
@@ -35,6 +44,6 @@ public class UserModel {
 
     @Override
     public String toString() {
-        return "(id = " + id + "; name = \"" + name + "\")";
+        return "(id = " + id + "; name = \"" + name + "\"; email = \"" + email + "\")";
     }
 }

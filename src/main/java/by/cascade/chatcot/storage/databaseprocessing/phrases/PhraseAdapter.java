@@ -19,6 +19,7 @@ import java.util.List;
 public interface PhraseAdapter {
     void addPhrase(String type, String phrase, int owner) throws DataBaseException;
     List<PhraseModel> listPhrases() throws DataBaseException;
+    LinkedList<PhraseModel> findByOwner(String owner) throws DataBaseException;
     void deletePhrases(List<PhraseModel> list) throws DataBaseException;
     void deleteId(PhraseModel model) throws DataBaseException;
     void deletePhrase(PhraseModel model) throws DataBaseException;

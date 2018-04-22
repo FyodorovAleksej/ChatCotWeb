@@ -16,6 +16,9 @@
     <h4>Login:</h4>
     <input type="text" class="text" name="login">
     <br/>
+    <h4>Email:</h4>
+    <input type="text" class="text" name="email">
+    <br/>
     <h4>Password:</h4>
     <input type="password" class="password-field" name="password">
     <br/>

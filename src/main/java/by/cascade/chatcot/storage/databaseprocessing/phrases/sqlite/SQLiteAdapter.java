@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SQLiteAdapter implements PhraseAdapter {
+public class SQLiteAdapter {//implements PhraseAdapter {
     private static final Logger LOGGER = LogManager.getLogger(SQLiteAdapter.class);
 
     private SQLiteUtil util;
@@ -35,7 +35,7 @@ public class SQLiteAdapter implements PhraseAdapter {
      * @param type - type of phrase
      * @param phrase - phrase
      */
-    @Override
+    //@Override
     public void addPhrase(String type, String phrase, int owner) throws DataBaseException {
         util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + TABLE_NAME + "(" + TYPE_COLUMN + ", " + PHRASE_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ");");
         LOGGER.info("Adding new phrase : (type = " + type + ", phrase = " + phrase + ") into (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
@@ -45,7 +45,7 @@ public class SQLiteAdapter implements PhraseAdapter {
      * getting all phrases from DataBase
      * @return - list of phrases
      */
-    @Override
+    //@Override
     public List<PhraseModel> listPhrases() throws DataBaseException {
         ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + ";");
         LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
@@ -59,7 +59,7 @@ public class SQLiteAdapter implements PhraseAdapter {
      * deleting list of phrases from DataBase
      * @param delList - list with phrases for deleting
      */
-    @Override
+    //@Override
     public void deletePhrases(List<PhraseModel> delList) throws DataBaseException {
         for (PhraseModel model : delList) {
             deleteId(model);
@@ -71,7 +71,7 @@ public class SQLiteAdapter implements PhraseAdapter {
      * deleting only phrase (not id and not type checking)
      * @param model - only phrase
      */
-    @Override
+    //@Override
     public void deletePhrase(PhraseModel model) throws DataBaseException {
         util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + PHRASE_COLUMN + " = \"" + model.getPhrase() + "\";");
         LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
@@ -81,7 +81,7 @@ public class SQLiteAdapter implements PhraseAdapter {
      * deleting only id (not type and not phrase check)
      * @param model - only id
      */
-    @Override
+    //@Override
     public void deleteId(PhraseModel model) throws DataBaseException {
         util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + ID_COLUMN + " = " + Integer.toString(model.getId()) + " ;");
         LOGGER.info("Deleting (id = " + model.getId() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
@@ -91,18 +91,18 @@ public class SQLiteAdapter implements PhraseAdapter {
      * deleting by type and phrase
      * @param model - type and phrase
      */
-    @Override
+    //@Override
     public void deleteModel(PhraseModel model) throws DataBaseException {
         util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + PHRASE_COLUMN + " = \"" + model.getPhrase() + "\" and " + TYPE_COLUMN + " = \"" + model.getType() + "\" ;");
         LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
     }
 
-    @Override
+    //@Override
     public void create() throws DataBaseException {
         util.execUpdate("CREATE TABLE " + TABLE_NAME + " ( " + ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL, " + TYPE_COLUMN + " VARCHAR (100) NOT NULL, " + PHRASE_COLUMN + " VARCHAR (200) NOT NULL, " + OWNER_COLUMN + " INTEGER);");
     }
 
-    @Override
+    //@Override
     public String findPhrase(String quote) throws DataBaseException {
         ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE PHRASE = \"" + quote + "\";");
         LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
@@ -111,14 +111,14 @@ public class SQLiteAdapter implements PhraseAdapter {
         return null;
     }
 
-    @Override
+    //@Override
     public LinkedList<PhraseModel> findType(String type) throws DataBaseException {
         ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE TYPE = \"" + type + "\";");
         LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
         return PhraseAdapter.getPhraseModels(set, LOGGER);
     }
 
-    @Override
+    //@Override
     public void refresh() {
 
     }
@@ -127,7 +127,7 @@ public class SQLiteAdapter implements PhraseAdapter {
     /**
      * closing connection from DataBase
      */
-    @Override
+    //@Override
     public void shutdown() {
         util.shutdown();
         LOGGER.info("Shutdown connection");

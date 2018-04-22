@@ -1,5 +1,7 @@
 package by.cascade.chatcot.connector;
 
+import by.cascade.chatcot.mail.MailException;
+import by.cascade.chatcot.mail.RegistrantKeyMap;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
@@ -17,15 +19,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedList;
 
-/**
- * Servlet of login system
- */
-public class LoginServlet extends HttpServlet {
-    private static final Logger LOGGER = LogManager.getLogger(LoginServlet.class);
+public class SignUpServlet extends HttpServlet {
+    private static final Logger LOGGER = LogManager.getLogger(SignUpServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
+        try {
+            doOperation(req, resp);
+        }
+        catch (DataBaseException | MailException e) {
+            LOGGER.catching(e);
+        }
     }
 
     @Override
@@ -33,54 +37,41 @@ public class LoginServlet extends HttpServlet {
         try {
             doOperation(req, resp);
         }
-        catch (DataBaseException e) {
+        catch (DataBaseException | MailException e) {
             LOGGER.catching(e);
         }
     }
 
     /**
-     * perform login operation
+     * performing registration
      *
      * @param request  - request from browser
      * @param response - response to browser
-     * @throws ServletException - exception of servlet
-     * @throws IOException      - exception for writing/reading streams
+     * @throws ServletException - servlet exception
+     * @throws IOException      - exception of write/read
      */
-    private void doOperation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, DataBaseException {
-        UserAdapter userAdapter = null;
+    private void doOperation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, DataBaseException, MailException {
+        UserAdapter userAdapter;
         try {
             userAdapter = new UserMySqlAdapter();
-
-            String login = request.getParameter("login");
-            String password = request.getParameter("password");
-
-            UserModel userModel = userAdapter.checkUser(login, password);
-
-            if (userModel != null) {
-                LOGGER.debug("login is successfully: " + login);
-                request.getSession().setAttribute("userName", userModel.getName());
+            String uuid = request.getParameter("uuid");
+            UserModel model = RegistrantKeyMap.getInstance().continueRegister(uuid);
+            if (model != null) {
+                userAdapter.addUser(model.getName(), model.getEmail(), model.getPassword());
+                request.getSession().setAttribute("userName", model.getName());
                 PhraseAdapter phraseAdapter = new PhrasesMySqlAdapter();
-                LinkedList<PhraseModel> phrases = phraseAdapter.findByOwner(userModel.getName());
+                LinkedList<PhraseModel> phrases = phraseAdapter.findByOwner(model.getName());
                 if (phrases != null && !phrases.isEmpty()) {
                     request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
                 }
                 else {
                     request.getSession().setAttribute("userScore", Integer.toString(0));
                 }
-                request.setAttribute("loginResult", "Login is successfully");
-            } else {
-                LOGGER.debug("login is not successfully: " + login);
-                request.setAttribute("loginResult", "Login is not successfully");
             }
-        } catch (DataBaseException e) {
-            LOGGER.catching(e);
+            response.sendRedirect("http://localhost:8080");
+        }
+        catch (DataBaseException e) {
             throw new RuntimeException(e);
         }
-        finally {
-            if (userAdapter != null) {
-                userAdapter.shutdown();
-            }
-        }
-        request.getRequestDispatcher("/").forward(request, response);
     }
 }

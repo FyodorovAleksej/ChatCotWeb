@@ -29,12 +29,19 @@
 <h2 class="text-center">${wel} </h2>
 <h2 class="text-center"><c:out value="${sessionScope.userName}"/></h2>
 <br/>
+<h2 class="text-center"><c:out value="${sessionScope.userScore}"/></h2>
+<br/>
 <% if (session.getAttribute("userName") == null) { %>
 <form action="login" method="post">
+    <h4>Login</h4>
     <input type="text" class="text" name="login">
+    <br/>
+    <h4>Password</h4>
     <input type="password" class="password-field" name="password">
+    <br/>
     <button type="submit" class="btn btn-primary">login</button>
     <button type="button" class="btn btn-primary" onClick='location.href="pages/register.jsp"'>sign up</button>
+    <br/>
 </form>
 <% } else { %>
 <form action="logout" method="get">
@@ -45,9 +52,8 @@
 <h4>${loginResult}</h4>
 <h4>${registerResult}</h4>
 <br/>
-
 <form>
-<select id="language" class="form-control" name="language">
+<select id="language" class="form-control" name="language" onclick="submit()">
     <option value="en" ${language == 'en' ? 'selected' : ''}>English</option>
     <option value="ru" ${language == 'ru' ? 'selected' : ''}>Russian</option>
 </select>

@@ -2,6 +2,7 @@ package by.cascade.chatcot.storage.databaseprocessing.phrases.mysql;
 
 import by.cascade.chatcot.storage.ConnectorException;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
+import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.util.MySqlUtil;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
@@ -12,6 +13,8 @@ import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import static by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter.*;
+
 
 /**
  * class for doing transactions by using MySQL server
@@ -21,12 +24,12 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
 
     private MySqlUtil util;
 
-    private static final String SCHEME_NAME = "phr";
-    private static final String TABLE_NAME = "phrases";
-    private static final String ID_COLUMN = "id";
-    private static final String TYPE_COLUMN = "type";
-    private static final String PHRASE_COLUMN = "phrase";
-    private static final String OWNER_COLUMN = "owner";
+    public static final String SCHEME_NAME = "chatcot";
+    public static final String PHRASE_TABLE_NAME = "phrases";
+    public static final String PHRASE_ID_COLUMN = "phraseId";
+    public static final String PHRASE_TYPE_COLUMN = "type";
+    public static final String PHRASE_PHRASE_COLUMN = "phrase";
+    public static final String PHRASE_OWNER_COLUMN = "owner";
 
 
     public PhrasesMySqlAdapter() throws DataBaseException {
@@ -53,8 +56,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public void addPhrase(String type, String phrase, int owner) throws DataBaseException {
-        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + TABLE_NAME + "(" + TYPE_COLUMN + ", " + PHRASE_COLUMN + ", " + OWNER_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ");");
-        LOGGER.info("Adding new phrase : (type = " + type + ", phrase = " + phrase + ") into (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + "(" + PHRASE_TYPE_COLUMN + ", " + PHRASE_PHRASE_COLUMN + ", " + PHRASE_OWNER_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ");");
+        LOGGER.info("Adding new phrase : (type = " + type + ", phrase = " + phrase + ") into (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
     /**
@@ -63,8 +66,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public List<PhraseModel> listPhrases() throws DataBaseException {
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + ";");
-        LOGGER.info("Getting all rows from MuSQL (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + ";");
+        LOGGER.info("Getting all rows from MuSQL (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME);
         List<PhraseModel> list = PhraseAdapter.getPhraseModels(set, LOGGER);
         if (list != null && !list.isEmpty()) {
             return list;
@@ -91,8 +94,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public void deletePhrase(PhraseModel model) throws DataBaseException {
-        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + PHRASE_COLUMN + " = \"" + model.getPhrase() + "\";");
-        LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_PHRASE_COLUMN + " = \"" + model.getPhrase() + "\";");
+        LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
     /**
@@ -101,8 +104,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public void deleteId(PhraseModel model) throws DataBaseException {
-        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + ID_COLUMN + " = " + Integer.toString(model.getId()) + " ;");
-        LOGGER.info("Deleting (id = " + model.getId() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_ID_COLUMN + " = " + Integer.toString(model.getId()) + " ;");
+        LOGGER.info("Deleting (id = " + model.getId() + ") from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
     /**
@@ -111,8 +114,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public void deleteModel(PhraseModel model) throws DataBaseException {
-        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE " + PHRASE_COLUMN + " = \"" + model.getPhrase() + "\" and " + TYPE_COLUMN + " = \"" + model.getType() + "\" ;");
-        LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_PHRASE_COLUMN + " = \"" + model.getPhrase() + "\" and " + PHRASE_TYPE_COLUMN + " = \"" + model.getType() + "\" ;");
+        LOGGER.info("Deleting (type = " + model.getType() + ", phrase = " + model.getPhrase() + ") from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
     @Override
@@ -124,17 +127,18 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
             LOGGER.info("scheme \"" + SCHEME_NAME + "\" is exist");
         }
         try {
-            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + TABLE_NAME + " (" + ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + TYPE_COLUMN + " VARCHAR(100) NOT NULL, " + PHRASE_COLUMN + " VARCHAR(200) NOT NULL, " + OWNER_COLUMN + " INT, PRIMARY KEY(id), UNIQUE INDEX " + ID_COLUMN + "_UNIQUE (" + ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
+            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " (" + PHRASE_ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + PHRASE_TYPE_COLUMN + " VARCHAR(100) NOT NULL, " + PHRASE_PHRASE_COLUMN + " VARCHAR(200) NOT NULL, " + PHRASE_OWNER_COLUMN + " INT, PRIMARY KEY(" + PHRASE_ID_COLUMN + "), UNIQUE INDEX " + PHRASE_ID_COLUMN + "_UNIQUE (" + PHRASE_ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
+            util.execUpdate("CREATE TABLE IF NOT EXISTS " + SCHEME_NAME + "." + USER_TABLE_NAME + " (" + USER_ID_COLUMN + " INT NOT NULL AUTO_INCREMENT, " + USER_EMAIL_COLUMN + " VARCHAR(100) NOT NULL, " + USER_NAME_COLUMN + " VARCHAR(100) NOT NULL, " + USER_PASSWORD_COLUMN + " VARCHAR(100) NOT NULL, PRIMARY KEY(" + USER_ID_COLUMN + "), UNIQUE INDEX " + USER_ID_COLUMN + "_UNIQUE (" + USER_ID_COLUMN + " ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;");
         }
         catch (DataBaseException e) {
-            LOGGER.info("table \"" + SCHEME_NAME + "." + TABLE_NAME + "\" is exist");
+            LOGGER.info("table \"" + SCHEME_NAME + "." + PHRASE_TABLE_NAME + "\" is exist");
         }
     }
 
     @Override
     public String findPhrase(String quote) throws DataBaseException {
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE PHRASE = \"" + quote + "\";");
-        LOGGER.info("Finding phrase \"" + quote + "\" in (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME + ")");
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE PHRASE = \"" + quote + "\";");
+        LOGGER.info("Finding phrase \"" + quote + "\" in (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
         List<PhraseModel> list = PhraseAdapter.getPhraseModels(set, LOGGER);
         if (list != null && !list.isEmpty())
             return list.get(0).getType();
@@ -143,8 +147,17 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
 
     @Override
     public LinkedList<PhraseModel> findType(String type) throws DataBaseException {
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + TABLE_NAME + " WHERE TYPE = \"" + type + "\";");
-        LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + TABLE_NAME);
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE TYPE = \"" + type + "\";");
+        LOGGER.info("Getting all rows from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME);
+        return PhraseAdapter.getPhraseModels(set, LOGGER);
+    }
+
+    @Override
+    public LinkedList<PhraseModel> findByOwner(String owner) throws DataBaseException {
+        ResultSet set = util.exec("SELECT " + PHRASE_TABLE_NAME + "." + PHRASE_ID_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_TYPE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_PHRASE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME +
+                " JOIN " + SCHEME_NAME + "." + USER_TABLE_NAME + " ON " + USER_TABLE_NAME + "." + USER_ID_COLUMN + " = " +
+                PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " WHERE " + USER_TABLE_NAME + "." + USER_NAME_COLUMN + " = \'" + owner + "\' ;");
+        LOGGER.info("Getting owner rows from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + "), where owner = " + owner);
         return PhraseAdapter.getPhraseModels(set, LOGGER);
     }
 
