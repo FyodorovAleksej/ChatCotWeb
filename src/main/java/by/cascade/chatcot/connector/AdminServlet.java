@@ -1,7 +1,5 @@
 package by.cascade.chatcot.connector;
 
-import by.cascade.chatcot.mail.MailException;
-import by.cascade.chatcot.mail.RegistrantKeyMap;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
@@ -9,6 +7,7 @@ import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlA
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
 import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
+import by.cascade.chatcot.view.PhraseView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,15 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedList;
 
-public class SignUpServlet extends HttpServlet {
-    private static final Logger LOGGER = LogManager.getLogger(SignUpServlet.class);
+public class AdminServlet extends HttpServlet {
+    private static final Logger LOGGER = LogManager.getLogger(AdminServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             doOperation(req, resp);
         }
-        catch (DataBaseException | MailException e) {
+        catch (DataBaseException e) {
             LOGGER.catching(e);
         }
     }
@@ -37,41 +36,48 @@ public class SignUpServlet extends HttpServlet {
         try {
             doOperation(req, resp);
         }
-        catch (DataBaseException | MailException e) {
+        catch (DataBaseException e) {
             LOGGER.catching(e);
         }
     }
 
     /**
-     * performing registration
+     *
      *
      * @param request  - request from browser
      * @param response - response to browser
-     * @throws ServletException - servlet exception
-     * @throws IOException      - exception of write/read
+     * @throws ServletException - exception of servlet
+     * @throws IOException      - exception for writing/reading streams
      */
-    private void doOperation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, DataBaseException, MailException {
-        UserAdapter userAdapter;
+    private void doOperation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, DataBaseException {
+        UserAdapter userAdapter = null;
+        PhraseAdapter phraseAdapter = null;
         try {
             userAdapter = new UserMySqlAdapter();
-            String uuid = request.getParameter("uuid");
-            UserModel model = RegistrantKeyMap.getInstance().continueRegister(uuid);
-            if (model != null) {
-                userAdapter.addUser(model.getName(), model.getEmail(), model.getPassword(), "user");
-                request.getSession().setAttribute("userName", model.getName());
-                PhraseAdapter phraseAdapter = new PhrasesMySqlAdapter();
-                LinkedList<PhraseModel> phrases = phraseAdapter.findByOwner(model.getName());
-                if (phrases != null && !phrases.isEmpty()) {
-                    request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
-                }
-                else {
-                    request.getSession().setAttribute("userScore", Integer.toString(0));
+            phraseAdapter = new PhrasesMySqlAdapter();
+            LinkedList<PhraseModel> phrases = phraseAdapter.listPhrases();
+            LinkedList<PhraseView> result = new LinkedList<PhraseView>();
+            if (phrases != null) {
+                for (PhraseModel phrase : phrases) {
+                    UserModel model = userAdapter.getUserById(phrase.getOwner());
+                    if (model != null) {
+                        result.add(new PhraseView(phrase.getPhrase(), phrase.getType(), phrase.getDate(), model.getName()));
+                    }
                 }
             }
-            response.sendRedirect("http://localhost:8080");
-        }
-        catch (DataBaseException e) {
+            request.setAttribute("phrasesList", result);
+        } catch (DataBaseException e) {
+            LOGGER.catching(e);
             throw new RuntimeException(e);
         }
+        finally {
+            if (userAdapter != null) {
+                userAdapter.shutdown();
+            }
+            if (phraseAdapter != null) {
+                phraseAdapter.shutdown();
+            }
+        }
+        request.getRequestDispatcher("/pages/admin.jsp").forward(request, response);
     }
 }

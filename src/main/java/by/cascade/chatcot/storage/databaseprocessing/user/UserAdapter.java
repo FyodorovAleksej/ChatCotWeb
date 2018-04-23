@@ -8,12 +8,13 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 
 public interface UserAdapter {
-    void addUser(String name, String email, String password) throws DataBaseException;
+    void addUser(String name, String email, String password, String role) throws DataBaseException;
     UserModel checkUser(String name, String password) throws DataBaseException;
     boolean checkLogin(String name) throws DataBaseException;
     void shutdown() throws DataBaseException ;
     void create() throws DataBaseException;
     UserModel getUser(String name) throws DataBaseException;
+    UserModel getUserById(int id) throws DataBaseException;
 
     static LinkedList<UserModel> getPhraseModels(ResultSet set, Logger log) {
         try {
@@ -24,7 +25,8 @@ public interface UserAdapter {
                     String name = set.getString(2);
                     String email = set.getString(3);
                     String password = set.getString(4);
-                    list.add(new UserModel(id, name, email, password));
+                    String role = set.getString(5);
+                    list.add(new UserModel(id, name, email, password, role));
                 }
                 set.close();
                 return list;

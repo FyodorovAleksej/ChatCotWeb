@@ -8,6 +8,7 @@ import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@Deprecated
 public class Initiator {
     private static final Logger LOGGER = LogManager.getLogger(Initiator.class);
 

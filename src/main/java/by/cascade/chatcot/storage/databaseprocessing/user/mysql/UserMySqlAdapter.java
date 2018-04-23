@@ -23,6 +23,8 @@ public class UserMySqlAdapter implements UserAdapter {
     public static final String USER_NAME_COLUMN = "login";
     public static final String USER_EMAIL_COLUMN = "email";
     public static final String USER_PASSWORD_COLUMN = "password";
+    public static final String USER_ROLE_COLUMN = "role";
+
 
 
     public UserMySqlAdapter() throws DataBaseException {
@@ -56,8 +58,19 @@ public class UserMySqlAdapter implements UserAdapter {
     }
 
     @Override
-    public void addUser(String name, String email, String password) throws DataBaseException {
-        util.execUpdate("INSERT INTO " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + "(" + USER_NAME_COLUMN + ", " + USER_EMAIL_COLUMN + ", " + USER_PASSWORD_COLUMN + ")" + " VALUES " + "(\"" + name + "\", \"" + email + "\", \"" + password + "\");");
+    public UserModel getUserById(int id) throws DataBaseException {
+        ResultSet set = util.execPrepare("SELECT * FROM " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + " WHERE " + USER_ID_COLUMN + " = ?;", Integer.toString(id));
+        LOGGER.info("Find user by id from (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME +")");
+        LinkedList<UserModel> list = UserAdapter.getPhraseModels(set, LOGGER);
+        if (list != null && !list.isEmpty()) {
+            return list.getFirst();
+        }
+        return null;
+    }
+
+    @Override
+    public void addUser(String name, String email, String password, String role) throws DataBaseException {
+        util.execUpdate("INSERT INTO " + USER_SCHEME_NAME + "." + USER_TABLE_NAME + "(" + USER_NAME_COLUMN + ", " + USER_EMAIL_COLUMN + ", " + USER_PASSWORD_COLUMN + ", " + USER_ROLE_COLUMN + ")" + " VALUES " + "(\"" + name + "\", \"" + email + "\", \"" + password + "\", \"" + role + "\");");
         LOGGER.info("Adding new user : (name = " + name + ") into (scheme = " + USER_SCHEME_NAME + ", table = " + USER_TABLE_NAME + ")");
     }
 

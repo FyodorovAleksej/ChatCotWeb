@@ -11,6 +11,10 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel.DATE_FORMAT;
 
 
 public class XmlDomParser implements PhraseParsable {
@@ -56,6 +60,7 @@ public class XmlDomParser implements PhraseParsable {
             String phrase = null;
             int id = 0;
             int owner = -1;
+            Date date = null;
 
             File inputFile = new File(path);
             if (!inputFile.exists()) {
@@ -83,14 +88,18 @@ public class XmlDomParser implements PhraseParsable {
                 phrase = getXMLArgument(nNode, "value");
 
                 String ownerString = getXMLArgument(nNode, "owner");
+                String dateString = getXMLArgument(nNode, "date");
+                SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+                date = format.parse(dateString);
                 if (ownerString != null) {
                     owner = Integer.valueOf(ownerString);
                 }
                 else {
                     owner = -1;
                 }
+
             }
-            return new PhraseModel(id, type, phrase, owner);
+            return new PhraseModel(id, type, phrase, date, owner);
         }catch (Exception e){
             e.printStackTrace();
             LOGGER.error(e.getMessage());

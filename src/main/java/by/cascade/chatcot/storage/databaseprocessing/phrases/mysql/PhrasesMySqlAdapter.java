@@ -10,9 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import static by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel.DATE_FORMAT;
 import static by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter.*;
 
 
@@ -30,6 +33,7 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
     public static final String PHRASE_TYPE_COLUMN = "type";
     public static final String PHRASE_PHRASE_COLUMN = "phrase";
     public static final String PHRASE_OWNER_COLUMN = "owner";
+    public static final String PHRASE_DATE_COLUMN = "date";
 
 
     public PhrasesMySqlAdapter() throws DataBaseException {
@@ -56,7 +60,8 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      */
     @Override
     public void addPhrase(String type, String phrase, int owner) throws DataBaseException {
-        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + "(" + PHRASE_TYPE_COLUMN + ", " + PHRASE_PHRASE_COLUMN + ", " + PHRASE_OWNER_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ");");
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+        util.execUpdate("INSERT INTO " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + "(" + PHRASE_TYPE_COLUMN + ", " + PHRASE_PHRASE_COLUMN + ", " + PHRASE_OWNER_COLUMN + ", " + PHRASE_DATE_COLUMN + ")" + " VALUES " + "(\"" + type + "\", \"" + phrase + "\", " + owner + ", \"" + format.format(new Date()) + "\");");
         LOGGER.info("Adding new phrase : (type = " + type + ", phrase = " + phrase + ") into (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
@@ -65,10 +70,10 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
      * @return - list of phrases
      */
     @Override
-    public List<PhraseModel> listPhrases() throws DataBaseException {
-        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + ";");
+    public LinkedList<PhraseModel> listPhrases() throws DataBaseException {
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " ORDER BY " + PHRASE_DATE_COLUMN + ";");
         LOGGER.info("Getting all rows from MuSQL (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME);
-        List<PhraseModel> list = PhraseAdapter.getPhraseModels(set, LOGGER);
+        LinkedList<PhraseModel> list = PhraseAdapter.getPhraseModels(set, LOGGER);
         if (list != null && !list.isEmpty()) {
             return list;
         }
@@ -154,9 +159,9 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
 
     @Override
     public LinkedList<PhraseModel> findByOwner(String owner) throws DataBaseException {
-        ResultSet set = util.exec("SELECT " + PHRASE_TABLE_NAME + "." + PHRASE_ID_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_TYPE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_PHRASE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME +
+        ResultSet set = util.exec("SELECT " + PHRASE_TABLE_NAME + "." + PHRASE_ID_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_TYPE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_PHRASE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_DATE_COLUMN + ", " + PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME +
                 " JOIN " + SCHEME_NAME + "." + USER_TABLE_NAME + " ON " + USER_TABLE_NAME + "." + USER_ID_COLUMN + " = " +
-                PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " WHERE " + USER_TABLE_NAME + "." + USER_NAME_COLUMN + " = \'" + owner + "\' ;");
+                PHRASE_TABLE_NAME + "." + PHRASE_OWNER_COLUMN + " WHERE " + USER_TABLE_NAME + "." + USER_NAME_COLUMN + " = \'" + owner + "\' ORDER BY " + PHRASE_DATE_COLUMN + ";");
         LOGGER.info("Getting owner rows from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + "), where owner = " + owner);
         return PhraseAdapter.getPhraseModels(set, LOGGER);
     }

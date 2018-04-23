@@ -14,14 +14,15 @@
 <fmt:setBundle basename="text" />
 <html lang="${language}">
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ChatCot</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <title>ChatCot</title>
+    <link href="${request.contextPath}/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="${request.contextPath}/js/http_cdnjs.cloudflare.com_ajax_libs_popper.js_1.12.9_umd_popper.js"></script>
+    <script src="${request.contextPath}/js/jquery-latest.js"></script>
+    <script src="${request.contextPath}/js/bootstrap.min.js"></script>
 </head>
 <body>
 <br/>
@@ -58,6 +59,7 @@
     <option value="ru" ${language == 'ru' ? 'selected' : ''}>Russian</option>
 </select>
 </form>
+<button type="button" class="btn btn-primary" onClick='location.href="/admin"'>View phrases</button>
 <fmt:message key="send" var="se"/>
 <form action="main" method="post">
     <input type="text" class="text" name="quote">

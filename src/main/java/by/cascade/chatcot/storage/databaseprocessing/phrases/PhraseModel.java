@@ -4,23 +4,28 @@ package by.cascade.chatcot.storage.databaseprocessing.phrases;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Date;
+
 public class PhraseModel {
     private static final Logger LOGGER = LogManager.getLogger(PhraseModel.class);
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private int id;
     private String type;
     private String phrase;
+    private Date date;
     private int owner;
 
-    public PhraseModel(int id, String type, String phrase, int owner) {
+    public PhraseModel(int id, String type, String phrase, Date date, int owner) {
         this.id = id;
         this.type = type;
         this.phrase = phrase;
+        this.date = date;
         this.owner = owner;
     }
 
     public PhraseModel(String type, String phrase, int owner) {
-        this(0, type, phrase, owner);
+        this(0, type, phrase, new java.util.Date(), owner);
     }
 
     public int getId() {
@@ -47,6 +52,10 @@ public class PhraseModel {
         this.phrase = phrase;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
     public int getOwner() {
         return owner;
     }
@@ -66,14 +75,15 @@ public class PhraseModel {
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (phrase != null ? phrase.hashCode() : 0);
-        return result;
+        return  Integer.hashCode(id) +
+                type.hashCode() +
+                phrase.hashCode() +
+                date.hashCode() +
+                Integer.hashCode(owner);
     }
 
     @Override
     public String toString() {
-        return id + " : " + type + " : " + phrase;
+        return id + " : " + type + " : " + phrase + " : " + date;
     }
 }

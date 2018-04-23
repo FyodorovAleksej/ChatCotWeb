@@ -10,15 +10,22 @@ public class UserModel {
     private String name;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("role")
+    private String role;
     @JsonIgnore
     private String password;
 
-    public UserModel(int id, String email, String name, String password) {
+    public UserModel(int id, String email, String name, String password, String role) {
         this.id = id;
         this.name = name;
         this.email = email;
         PasswordEncrypt encrypt = new PasswordEncrypt();
         this.password = encrypt.encrypt(password);
+        this.role = role;
+    }
+
+    public UserModel(int id, String email, String name, String password) {
+        this (id, email, name, password, "user");
     }
 
     public int getId() {
@@ -33,6 +40,10 @@ public class UserModel {
     public String getPassword() {
         return password;
     }
+    public String getRole() {
+        return role;
+    }
+
     public boolean checkPassword(String password) {
         PasswordEncrypt encrypt = new PasswordEncrypt();
         return (encrypt.encrypt(password).equals(this.password));
