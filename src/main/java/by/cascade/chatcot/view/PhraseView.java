@@ -10,13 +10,17 @@ public class PhraseView {
     private String type;
     private Date date;
     private String owner;
+    private int id;
 
-    public PhraseView(String phrase, String type, Date date, String owner) {
+    public PhraseView(int id, String phrase, String type, Date date, String owner) {
+        this.id = id;
         this.phrase = phrase;
         this.type = type;
         this.date = date;
         this.owner = owner;
     }
+
+    public String getId() {return Integer.toString(id);}
 
     public String getPhrase() {
         return phrase;

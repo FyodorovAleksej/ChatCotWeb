@@ -88,7 +88,7 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
     @Override
     public void deletePhrases(List<PhraseModel> delList) throws DataBaseException {
         for (PhraseModel model : delList) {
-            deleteId(model);
+            deleteId(model.getId());
         }
         LOGGER.info("Deleting list of models");
     }
@@ -105,12 +105,12 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
 
     /**
      * deleting only id (not type and not phrase check)
-     * @param model - only id
+     * @param id - only id
      */
     @Override
-    public void deleteId(PhraseModel model) throws DataBaseException {
-        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_ID_COLUMN + " = " + Integer.toString(model.getId()) + " ;");
-        LOGGER.info("Deleting (id = " + model.getId() + ") from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
+    public void deleteId(int id) throws DataBaseException {
+        util.execUpdate("DELETE FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_ID_COLUMN + " = " + Integer.toString(id) + " ;");
+        LOGGER.info("Deleting (id = " + id + ") from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
     }
 
     /**
@@ -148,6 +148,22 @@ public class PhrasesMySqlAdapter implements PhraseAdapter {
         if (list != null && !list.isEmpty())
             return list.get(0).getType();
         return null;
+    }
+
+    @Override
+    public PhraseModel findPhraseById(int id) throws DataBaseException {
+        ResultSet set = util.exec("SELECT * FROM " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " WHERE " + PHRASE_ID_COLUMN + " = " + id + ";");
+        LOGGER.info("Finding id = " + id + " in (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME + ")");
+        List<PhraseModel> list = PhraseAdapter.getPhraseModels(set, LOGGER);
+        if (list != null && !list.isEmpty())
+            return list.get(0);
+        return null;
+    }
+
+    @Override
+    public int editPhrase(int id, String newText, String newType) throws DataBaseException {
+        LOGGER.info("Edit row from (scheme = " + SCHEME_NAME + ", table = " + PHRASE_TABLE_NAME);
+        return util.execUpdate("UPDATE " + SCHEME_NAME + "." + PHRASE_TABLE_NAME + " SET " + PHRASE_TYPE_COLUMN + " = \"" + newType + "\", " + PHRASE_PHRASE_COLUMN + " = \"" + newText + "\" WHERE " + PHRASE_ID_COLUMN + " = " + id + ";");
     }
 
     @Override

@@ -26,8 +26,10 @@ public interface PhraseAdapter {
     void addPhrase(String type, String phrase, int owner) throws DataBaseException;
     LinkedList<PhraseModel> listPhrases() throws DataBaseException;
     LinkedList<PhraseModel> findByOwner(String owner) throws DataBaseException;
+    PhraseModel findPhraseById(int id) throws DataBaseException;
+    int editPhrase(int id, String newText, String newType) throws DataBaseException;
     void deletePhrases(List<PhraseModel> list) throws DataBaseException;
-    void deleteId(PhraseModel model) throws DataBaseException;
+    void deleteId(int id) throws DataBaseException;
     void deletePhrase(PhraseModel model) throws DataBaseException;
     void deleteModel(PhraseModel model) throws DataBaseException;
     void shutdown() throws DataBaseException;
