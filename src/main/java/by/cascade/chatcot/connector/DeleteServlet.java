@@ -1,8 +1,10 @@
 package by.cascade.chatcot.connector;
 
+import by.cascade.chatcot.jsonmodel.PhraseDeleteJson;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlAdapter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +47,11 @@ public class DeleteServlet extends HttpServlet {
         PhraseAdapter phraseAdapter = null;
         try {
             phraseAdapter = new PhrasesMySqlAdapter();
-            String id = request.getParameter("phraseItemId");
+
+            ObjectMapper mapper = new ObjectMapper();
+            PhraseDeleteJson phraseJson = mapper.readValue(request.getInputStream(), PhraseDeleteJson.class);
+
+            String id = phraseJson.getId();
             phraseAdapter.deleteId(Integer.valueOf(id));
 
         } catch (DataBaseException e) {

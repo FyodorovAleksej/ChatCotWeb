@@ -14,7 +14,7 @@ import java.util.Properties;
  * class - creator for creating connections
  */
 public class ConnectionCreator {
-    private static final String URL = "jdbc:mysql://localhost:3306/musicstore";
+    private static final String URL = "jdbc:mysql://localhost:3306/";
 
     private Properties properties;
 

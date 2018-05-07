@@ -1,6 +1,7 @@
 package by.cascade.chatcot.storage.databaseprocessing.phrases;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,10 +11,15 @@ public class PhraseModel {
     private static final Logger LOGGER = LogManager.getLogger(PhraseModel.class);
     public static final String DATE_FORMAT = "yyyy-MM-dd";
 
+    @JsonProperty("id")
     private int id;
+    @JsonProperty("type")
     private String type;
+    @JsonProperty("phrase")
     private String phrase;
+    @JsonProperty("date")
     private Date date;
+    @JsonProperty("owner")
     private int owner;
 
     public PhraseModel(int id, String type, String phrase, Date date, int owner) {

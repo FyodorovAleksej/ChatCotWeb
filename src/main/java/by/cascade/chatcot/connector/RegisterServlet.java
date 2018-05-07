@@ -1,5 +1,6 @@
 package by.cascade.chatcot.connector;
 
+import by.cascade.chatcot.jsonmodel.UserRegisterJson;
 import by.cascade.chatcot.mail.MailException;
 import by.cascade.chatcot.mail.MailSender;
 import by.cascade.chatcot.mail.RegistrantKeyMap;
@@ -7,6 +8,7 @@ import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
 import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,10 +53,13 @@ public class RegisterServlet extends HttpServlet {
         try {
             userAdapter = new UserMySqlAdapter();
 
-            String login = request.getParameter("login");
-            String password = request.getParameter("password");
-            String repPassword = request.getParameter("repPassword");
-            String email = request.getParameter("email");
+            ObjectMapper mapper = new ObjectMapper();
+            UserRegisterJson userRegisterJson = mapper.readValue(request.getInputStream(), UserRegisterJson.class);
+
+            String login = userRegisterJson.getLogin();
+            String password = userRegisterJson.getPassword();
+            String repPassword = userRegisterJson.getRepPassword();
+            String email = userRegisterJson.getEmail();
 
             boolean equal = password.equals(repPassword);
             boolean check = !userAdapter.checkLogin(login);

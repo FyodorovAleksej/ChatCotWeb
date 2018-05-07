@@ -2,6 +2,10 @@ package by.cascade.chatcot.connector;
 
 import by.cascade.chatcot.actor.ActionProcessor;
 import by.cascade.chatcot.actor.CommandParser;
+import by.cascade.chatcot.jsonmodel.CommandJson;
+import by.cascade.chatcot.jsonmodel.PhraseInputJson;
+import by.cascade.chatcot.jsonmodel.PhraseInputTypeJson;
+import by.cascade.chatcot.jsonmodel.PhraseOutJson;
 import by.cascade.chatcot.phrases.BotProcessor;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
@@ -13,14 +17,17 @@ import by.cascade.chatcot.storage.databaseprocessing.todolists.xml.XmlDomListPar
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
 import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 
 /**
@@ -54,9 +61,10 @@ public class MainServlet extends HttpServlet {
         try {
             request.setCharacterEncoding("utf-8");
             response.setCharacterEncoding("utf-8");
+            response.setContentType( "application/json");
 
             LOGGER.info("realPath = \"" + getServletContext().getRealPath("") + "\"");
-            String oldPhrase = (String) getServletContext().getAttribute("oldPhrase");
+            String oldPhrase = (String)getServletContext().getAttribute("oldPhrase");
             String userName = (String)request.getSession().getAttribute("userName");
             int owner = -1;
             if (userName != null) {
@@ -71,38 +79,44 @@ public class MainServlet extends HttpServlet {
 
             LOGGER.info("trying to saving phrase = \"" + oldPhrase + "\"");
             if (oldPhrase != null) {
-                String type = request.getParameter("choiceType");
+                ObjectMapper mapper = new ObjectMapper();
+                PhraseInputJson typeJson = mapper.readValue(request.getInputStream(), PhraseInputJson.class);
+                String type = typeJson.getQuote();
                 LOGGER.info("save phrase = \"" + oldPhrase + "\" with type = \"" + type + "\"");
-                String answer = botProcessor.save(type, oldPhrase, owner);
+                botProcessor.save(type, oldPhrase, owner);
+                response.setStatus(200);
                 LinkedList<PhraseModel> phrases = adapter.findByOwner(userName);
                 if (phrases != null && !phrases.isEmpty()) {
-                    request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
+                    response.addCookie(new Cookie("userScore", Integer.toString(phrases.size())));
                 }
                 else {
-                    request.getSession().setAttribute("userScore", Integer.toString(0));
+                    response.addCookie(new Cookie("userScore", Integer.toString(0)));
                 }
-                request.setAttribute("answer", answer);
                 getServletContext().setAttribute("oldPhrase", null);
             } else {
-                String quote = request.getParameter("quote");
+
+                ObjectMapper mapper = new ObjectMapper();
+                PhraseInputJson inputJson = mapper.readValue(request.getInputStream(), PhraseInputJson.class);
+
+                String quote = inputJson.getQuote();
+
                 if (quote != null) {
                     LOGGER.info("action");
                     ActionProcessor processor = new ActionProcessor(botProcessor, listAdapter, owner);
-                    String answer = processor.doAction(quote);
+                    PhraseOutJson answer = processor.doAction(quote);
                     LOGGER.info("answer = \"" + answer + "\"");
-                    if (answer == null) {
+                    if (answer.getAnswer() == null) {
                         LOGGER.info("null answer");
-                        request.setAttribute("resp", "unknown phrase");
-                        request.setAttribute("answer", UNKNOWN_PHRASE);
+                        answer.setType(0);
+                        writeJson(response, answer);
                         getServletContext().setAttribute("oldPhrase", new CommandParser().removeArgs(quote));
                     } else {
-                        request.setAttribute("answer", answer);
+                        writeJson(response, answer);
                         getServletContext().setAttribute("oldPhrase", null);
                     }
                 }
             }
             botProcessor.close();
-            goTo("/index.jsp", request, response);
         }
         catch (Exception e) {
             LOGGER.catching(e);
@@ -152,5 +166,12 @@ public class MainServlet extends HttpServlet {
             LOGGER.catching(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static void writeJson(HttpServletResponse response, Object object) throws IOException {
+        PrintWriter out = response.getWriter();
+        ObjectMapper mapper = new ObjectMapper();
+        out.write(mapper.writeValueAsString(object));
+        out.flush();
     }
 }

@@ -1,9 +1,12 @@
 package by.cascade.chatcot.actor;
 
+import by.cascade.chatcot.jsonmodel.PhraseOutJson;
 import by.cascade.chatcot.phrases.BotProcessor;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.todolists.ListModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +46,7 @@ public class ActionProcessor {
      * @param action - command for performing
      * @return - result of performing
      */
-    public String doAction(String action) throws DataBaseException {
+    public PhraseOutJson doAction(String action) throws DataBaseException {
         LOGGER.info("do action = " + action);
         if (INITIALIZE.equals(action)) {
             doInitialize();
@@ -52,7 +55,7 @@ public class ActionProcessor {
         LinkedList<String> arguments = parser.parse(action);
         action = parser.removeArgs(action);
         bot.open();
-        String result = mapping(bot.check(action), arguments);
+        PhraseOutJson result = mapping(bot.check(action), arguments);
         bot.close();
         return result;
     }
@@ -63,29 +66,29 @@ public class ActionProcessor {
      * @param arguments - arguments of command
      * @return - result of performing
      */
-    private String mapping(String action, LinkedList<String> arguments) throws DataBaseException {
+    private PhraseOutJson mapping(String action, LinkedList<String> arguments) throws DataBaseException {
                if (GREETING_STANDARD_COMMAND.getCommand().equals(action)) {
-                   return doGreetingStandard();
+                   return new PhraseOutJson(1, doGreetingStandard());
         } else if (GREETING_SPECIAL_COMMAND.getCommand().equals(action)) {
-                   return doGreetingSpecial(action);
+                   return new PhraseOutJson(2,doGreetingSpecial(action));
         } else if (GREETING_QUESTION_COMMAND.getCommand().equals(action)) {
-                   return doGreetingQuestion();
+                   return new PhraseOutJson(3, doGreetingQuestion());
         } else if (GREETING_ANSWER_COMMAND.getCommand().equals(action)) {
-                   return doGreetingAnswer();
+                   return new PhraseOutJson(4, doGreetingAnswer());
         } else if (YES_COMMAND.getCommand().equals(action)) {
-                   return doYes(action);
+                   return new PhraseOutJson(5, doYes(action));
         } else if (NO_COMMAND.getCommand().equals(action)) {
-                   return doNo(action);
+                   return new PhraseOutJson(6, doNo(action));
         } else if (INITIALIZE_COMMAND.getCommand().equals(action)) {
-                   return doInitialize();
+                   return new PhraseOutJson(7, doInitialize());
         } else if (FILTER_COMMAND.getCommand().equals(action)) {
-                   return doFilter(action, arguments);
+                   return new PhraseOutJson(8, doFilter(action, arguments));
         } else if (FILTER_COMMAND_BY_CHECK.getCommand().equals(action)) {
-                   return doFilterByCheck(action, arguments);
+                   return new PhraseOutJson(9, doFilterByCheck(action, arguments));
         } else if (ADDING_COMMAND.getCommand().equals(action)) {
-                   return doAdding(action, arguments);
+                   return new PhraseOutJson(10, doAdding(action, arguments));
         } else {
-                   return doDefault(action);
+                   return new PhraseOutJson(11, doDefault(action));
         }
     }
 
@@ -182,16 +185,10 @@ public class ActionProcessor {
                 LOGGER.info("since = (" + format.parse(arguments.get(0)).toString() + ")");
                 LOGGER.info("until = (" + format.parse(arguments.get(1)).toString() + ")");
                 LinkedList<ListModel> list = listAdapter.filterTaskes(format.parse(arguments.get(0)), format.parse(arguments.get(1)), owner);
-                StringBuilder builder = new StringBuilder("<table border=\"1\">\n" +
-                        "<caption><fmt:message key=\"todo lists\"/></caption>\n" +
-                        "<br/>");
-                builder.append(ListModel.getHtmlTableHeader());
-                for (ListModel model : list) {
-                    builder.append(model.toHTML());
-                }
-                builder.append("</table>");
-                return builder.toString();
-            } catch (ParseException e) {
+
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.writeValueAsString(list);
+            } catch (ParseException | JsonProcessingException e) {
                 LOGGER.catching(e);
                 return "INVALID ARGUMENT FOR FILTER";
             }

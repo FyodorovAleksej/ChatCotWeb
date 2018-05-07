@@ -1,5 +1,6 @@
 package by.cascade.chatcot.connector;
 
+import by.cascade.chatcot.jsonmodel.UserLoginJson;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseModel;
@@ -7,14 +8,17 @@ import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlA
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserModel;
 import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 
 /**
@@ -51,26 +55,33 @@ public class LoginServlet extends HttpServlet {
         try {
             userAdapter = new UserMySqlAdapter();
 
-            String login = request.getParameter("login");
-            String password = request.getParameter("password");
+            ObjectMapper mapper = new ObjectMapper();
+            UserLoginJson userLoginJson = mapper.readValue(request.getInputStream(), UserLoginJson.class);
+
+            String login = userLoginJson.getName();
+            String password = userLoginJson.getPassword();
 
             UserModel userModel = userAdapter.checkUser(login, password);
 
             if (userModel != null) {
                 LOGGER.debug("login is successfully: " + login);
                 request.getSession().setAttribute("userName", userModel.getName());
+
                 PhraseAdapter phraseAdapter = new PhrasesMySqlAdapter();
                 LinkedList<PhraseModel> phrases = phraseAdapter.findByOwner(userModel.getName());
                 if (phrases != null && !phrases.isEmpty()) {
-                    request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
+                    response.addCookie(new Cookie("userScore", Integer.toString(phrases.size())));
+                    response.setStatus(200);
                 }
                 else {
-                    request.getSession().setAttribute("userScore", Integer.toString(0));
+                    response.addCookie(new Cookie("userScore", Integer.toString(0)));
+                    response.setStatus(200);
                 }
-                request.setAttribute("loginResult", "Login is successfully");
+                response.addCookie(new Cookie("userName", userModel.getName()));
+                response.setStatus(200);
             } else {
                 LOGGER.debug("login is not successfully: " + login);
-                request.setAttribute("loginResult", "Login is not successfully");
+                response.setStatus(401);
             }
         } catch (DataBaseException e) {
             LOGGER.catching(e);
@@ -81,6 +92,5 @@ public class LoginServlet extends HttpServlet {
                 userAdapter.shutdown();
             }
         }
-        request.getRequestDispatcher("/").forward(request, response);
     }
 }

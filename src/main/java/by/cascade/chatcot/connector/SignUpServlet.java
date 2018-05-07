@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,10 +63,12 @@ public class SignUpServlet extends HttpServlet {
                 PhraseAdapter phraseAdapter = new PhrasesMySqlAdapter();
                 LinkedList<PhraseModel> phrases = phraseAdapter.findByOwner(model.getName());
                 if (phrases != null && !phrases.isEmpty()) {
-                    request.getSession().setAttribute("userScore", Integer.toString(phrases.size()));
+                    response.addCookie(new Cookie("userScore", Integer.toString(phrases.size())));
+                    response.setStatus(200);
                 }
                 else {
-                    request.getSession().setAttribute("userScore", Integer.toString(0));
+                    response.addCookie(new Cookie("userScore", Integer.toString(0)));
+                    response.setStatus(200);
                 }
             }
             response.sendRedirect("http://localhost:8080");

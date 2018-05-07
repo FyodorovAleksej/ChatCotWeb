@@ -1,10 +1,13 @@
 package by.cascade.chatcot.connector;
 
+import by.cascade.chatcot.jsonmodel.CommandJson;
+import by.cascade.chatcot.jsonmodel.UserLoginJson;
 import by.cascade.chatcot.storage.databaseprocessing.DataBaseException;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.PhraseAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.phrases.mysql.PhrasesMySqlAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.UserAdapter;
 import by.cascade.chatcot.storage.databaseprocessing.user.mysql.UserMySqlAdapter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,8 +54,11 @@ public class AddPerformServlet extends HttpServlet {
             phraseAdapter = new PhrasesMySqlAdapter();
             userAdapter = new UserMySqlAdapter();
 
-            String newPhraseText = request.getParameter("phraseTextNew");
-            String newType = request.getParameter("choiceType");
+            ObjectMapper mapper = new ObjectMapper();
+            CommandJson commandJson = mapper.readValue(request.getInputStream(), CommandJson.class);
+
+            String newPhraseText = commandJson.getNewPhraseText();
+            String newType = commandJson.getNewType();
 
 
             phraseAdapter.addPhrase(newType, newPhraseText, userAdapter.getUser((String) request.getSession().getAttribute("userName")).getId());
