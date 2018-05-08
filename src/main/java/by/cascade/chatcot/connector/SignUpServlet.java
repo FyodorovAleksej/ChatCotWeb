@@ -71,7 +71,6 @@ public class SignUpServlet extends HttpServlet {
                     response.setStatus(200);
                 }
             }
-            response.sendRedirect("http://localhost:8080");
         }
         catch (DataBaseException e) {
             throw new RuntimeException(e);
